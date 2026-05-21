@@ -1,7 +1,5 @@
 "use client";
 
-import "../lib/leaflet";
-
 import {
   MapContainer,
   TileLayer,
@@ -10,6 +8,10 @@ import {
   useMapEvents,
 } from "react-leaflet";
 
+import debounce from "lodash.debounce";
+
+import { useMemo } from "react";
+import { memo } from "react";
 
 type Props = {
   listings: any[];
@@ -19,11 +21,26 @@ type Props = {
 function MapEvents({
   onBoundsChange,
 }: {
-  onBoundsChange?: (bbox: string) => void;
+  onBoundsChange?: (
+    bbox: string
+  ) => void;
 }) {
+  const debouncedBoundsChange =
+    useMemo(
+      () =>
+        debounce(
+          (bbox: string) => {
+            onBoundsChange?.(bbox);
+          },
+          500
+        ),
+      [onBoundsChange]
+    );
+
   useMapEvents({
-    moveend(map) {
-      const bounds = map.target.getBounds();
+    moveend: (event) => {
+      const bounds =
+        event.target.getBounds();
 
       const bbox = [
         bounds.getWest(),
@@ -32,14 +49,13 @@ function MapEvents({
         bounds.getNorth(),
       ].join(",");
 
-      onBoundsChange?.(bbox);
+      debouncedBoundsChange(bbox);
     },
   });
 
   return null;
 }
-
-export default function Map({
+function Map({
   listings,
   onBoundsChange,
 }: Props) {
@@ -47,11 +63,16 @@ export default function Map({
     <MapContainer
       center={[42.66, 21.16]}
       zoom={8}
-      className="h-full w-full"
+      className="h-full w-full rounded-[32px] overflow-hidden shadow-2xl shadow-black/10"
+      scrollWheelZoom={true}
+      zoomControl={false}
+      placeholder={
+  <div className="h-full w-full bg-gray-200 animate-pulse rounded-[32px]" />
+}
     >
       <TileLayer
         attribution="&copy; OpenStreetMap contributors"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
       />
 
       <MapEvents onBoundsChange={onBoundsChange} />
@@ -65,18 +86,33 @@ export default function Map({
           ]}
         >
           <Popup>
-            <div>
-              <h2 className="font-bold">
-                {listing.title}
-              </h2>
+            <div className="min-w-[220px]">
+  <img
+    src={
+      listing.images?.[0]
+    }
+    alt={listing.title}
+    className="w-full h-28 object-cover rounded-xl mb-3"
+  />
 
-              <p>{listing.city}</p>
+  <h2 className="font-bold text-lg leading-5 mb-1">
+    {listing.title}
+  </h2>
 
-              <p>${listing.price}</p>
-            </div>
+  <p className="text-gray-500 text-sm mb-2">
+    📍 {listing.city}
+  </p>
+
+  <p className="font-bold text-xl">
+    $
+    {listing.price?.toLocaleString()}
+  </p>
+</div>
           </Popup>
         </Marker>
       ))}
     </MapContainer>
   );
 }
+
+export default memo(Map);
