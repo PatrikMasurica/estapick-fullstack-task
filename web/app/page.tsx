@@ -21,12 +21,17 @@ const fetchListings = useCallback(async () => {
   try {
     setLoading(true);
     const filters: any = {};
-    if (city && city.trim() !== "") {
-      filters.city = city;
-    }
-    if (minPrice && minPrice !== "") {
-      filters.minPrice = parseFloat(minPrice);
-    }
+   if (debouncedCity && debouncedCity.trim() !== "") {
+  filters.city = debouncedCity;
+}
+
+if (
+  debouncedMinPrice &&
+  debouncedMinPrice !== ""
+) {
+  filters.minPrice =
+    parseFloat(debouncedMinPrice);
+}
     
     console.log("Fetching with filters:", filters);
     const data = await getListings(filters);
@@ -41,7 +46,7 @@ const fetchListings = useCallback(async () => {
   } finally {
     setLoading(false);
   }
-}, [city, minPrice]);
+}, [debouncedCity, debouncedMinPrice]);
 
   useEffect(() => {
     fetchListings();
@@ -62,18 +67,18 @@ const fetchListings = useCallback(async () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
+      <header className="bg-white/80 backdrop-blur-md border-b sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">Estapick Real Estate</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-gray-900">Estapick Real Estate</h1>
           <p className="text-gray-600 mt-1">Find your dream property</p>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters Section */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm border border-gray-100 p-6 mb-8">
           <h2 className="text-lg font-semibold mb-4">Filter Properties</h2>
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
@@ -85,7 +90,7 @@ const fetchListings = useCallback(async () => {
                 placeholder="e.g., Prishtina, Tirana, Skopje..."
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black transition"
               />
             </div>
             <div className="flex-1">
@@ -97,13 +102,13 @@ const fetchListings = useCallback(async () => {
                 placeholder="e.g., 100000"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+               className="w-full px-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black transition"
               />
             </div>
             <div className="flex items-end">
               <button
                 onClick={clearFilters}
-                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                className="px-6 py-3 bg-black text-white rounded-2xl hover:opacity-90 transition-all"
               >
                 Clear Filters
               </button>
@@ -137,7 +142,7 @@ const fetchListings = useCallback(async () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
                 <div className="h-48 bg-gray-300"></div>
@@ -172,17 +177,17 @@ const fetchListings = useCallback(async () => {
 
         {/* Listings Grid */}
         {!loading && listings.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {listings.map((listing: any) => (
               <Link href={`/listings/${listing.id}`} key={listing.id}>
-                <div className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
+               <div className="group bg-white rounded-3xl overflow-hidden border border-gray-100 hover:shadow-2xl hover:shadow-black/5 transition-all duration-500 cursor-pointer hover:-translate-y-1">
                   {/* Image Container */}
                   <div className="relative h-48 overflow-hidden bg-gray-200">
                     {!imageErrors[listing.id] ? (
                       <img
                         src={listing.images?.[0] || "https://picsum.photos/400/300?random=1"}
                         alt={listing.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         onError={() => handleImageError(listing.id)}
                       />
                     ) : (
@@ -193,17 +198,17 @@ const fetchListings = useCallback(async () => {
                       </div>
                     )}
                     {/* Price Badge */}
-                    <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                   <div className="absolute top-4 right-4 bg-black/80 backdrop-blur text-white px-4 py-2 rounded-full text-sm font-semibold">
                       ${formatPrice(listing.price)}
                     </div>
                   </div>
                   
                   {/* Content */}
-                  <div className="p-4">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition">
+                  <div className="p-5">
+                    <h2 className="text-xl font-bold text-gray-900 mb-1 transition group-hover:text-black">
                       {listing.title}
                     </h2>
-                    <p className="text-gray-600 text-sm mb-2 flex items-center">
+                    <p className="text-gray-500 text-sm leading-6 line-clamp-2 mb-4">
                       <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -211,7 +216,7 @@ const fetchListings = useCallback(async () => {
                       {listing.city}, {listing.address}
                     </p>
                     <p className="text-gray-500 text-sm line-clamp-2 mb-3">{listing.description}</p>
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                       <div className="flex items-center gap-3 text-sm text-gray-600">
                         <span className="flex items-center">
                           🛏️ {listing.bedrooms}
