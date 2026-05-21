@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getListing } from "../../src/services/listings";
 
 export default function ListingDetailPage() {
   const params = useParams();
@@ -15,13 +14,17 @@ export default function ListingDetailPage() {
     const fetchListing = async () => {
       try {
         setLoading(true);
-        console.log("Fetching listing with ID:", params.id);
-        const data = await getListing(params.id as string);
-        console.log("Listing data:", data);
+        const id = params.id;
+        console.log("Fetching listing with ID:", id);
+        
+        const response = await fetch(`http://localhost:3001/listings/${id}`);
+        const data = await response.json();
+        
+        console.log("Received data:", data);
         setListing(data);
         setError(false);
       } catch (err) {
-        console.error("Error fetching listing:", err);
+        console.error("Error:", err);
         setError(true);
       } finally {
         setLoading(false);
@@ -36,7 +39,7 @@ export default function ListingDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading listing...</div>
+        <div className="text-xl">Loading property details...</div>
       </div>
     );
   }
@@ -45,9 +48,9 @@ export default function ListingDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded">
-          <p>Listing not found</p>
+          <p>Property not found. ID: {params.id}</p>
           <Link href="/" className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded">
-            Go Back Home
+            ← Back to Listings
           </Link>
         </div>
       </div>
@@ -55,22 +58,22 @@ export default function ListingDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <Link href="/" className="text-blue-600 hover:underline mb-4 inline-block">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto p-6">
+        <Link href="/" className="text-blue-600 hover:underline inline-block mb-6">
           ← Back to listings
         </Link>
-        
+
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {listing.images && listing.images.length > 0 ? (
             <img
               src={listing.images[0]}
               alt={listing.title}
-              className="w-full h-[400px] object-cover"
+              className="w-full h-96 object-cover"
             />
           ) : (
-            <div className="w-full h-[400px] bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-500 text-lg">No image available</span>
+            <div className="w-full h-96 bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-500">No image available</span>
             </div>
           )}
           
@@ -90,11 +93,9 @@ export default function ListingDetailPage() {
               <p className="text-gray-700">{listing.description}</p>
             </div>
             
-            <div className="mb-6">
+            <div>
               <h2 className="text-xl font-semibold mb-2">Location</h2>
-              <p className="text-gray-700">
-                📍 {listing.address}, {listing.city}
-              </p>
+              <p className="text-gray-700">📍 {listing.address}, {listing.city}</p>
             </div>
           </div>
         </div>
