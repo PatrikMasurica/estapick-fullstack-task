@@ -1,10 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule); // 'app' is defined here
+  const app = await NestFactory.create(AppModule);
+  
+  // Enable CORS
+  app.enableCors({
+    origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
+  });
   
   app.useGlobalPipes(
     new ValidationPipe({
@@ -13,19 +19,10 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  const config = new DocumentBuilder()
-  .setTitle('Listings API')
-  .setDescription('Real Estate API')
-  .setVersion('1.0')
-  .build();
-
-const document = SwaggerModule.createDocument(
-  app,
-  config,
-);
-
-SwaggerModule.setup('api', app, document);
   
-  await app.listen(3000);
+  // Change port to 3001
+  const port = 3001;
+  await app.listen(port);
+  console.log(`🚀 Backend running on http://localhost:${port}`);
 }
 bootstrap();

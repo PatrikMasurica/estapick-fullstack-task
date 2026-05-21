@@ -31,7 +31,7 @@ export default function Home() {
   const fetchListings = async () => {
     try {
       setLoading(true);
-      let url = 'http://localhost:3000/listings';
+      let url = 'http://localhost:3001/listings';
       const params = new URLSearchParams();
       
       if (filters.city) params.append('city', filters.city);

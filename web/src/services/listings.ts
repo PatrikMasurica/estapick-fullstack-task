@@ -1,4 +1,4 @@
-import { api } from "@/lib/api";
+import { api } from "../lib/api";
 
 export const getListings = async (params?: any) => {
   const res = await api.get("/listings", { params });
